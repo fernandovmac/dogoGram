@@ -6,7 +6,9 @@ import CallForAction from "./CallForAction";
 import CommentsTile from "./CommentsDropdown.js";
 import PostNavBar from "./PostNavHeader.js";
 // import P5Wrapper from "react-p5-wrapper";
-import P5Sketch from "./P5Sketch.js";
+// import P5Sketch from "./P5Sketch.js";
+// import P5Sketch2 from "./P5Sketch2.js";
+import P5Canvas from "./P5Sketch2.js";
 
 // var P5Wrapper = require("react-p5-wrapper");
 
@@ -56,7 +58,7 @@ class App extends Component {
               postDate={postCard.postDate}
               postLoc={postCard.postLoc}
             ></ImageHeader>
-            <P5Sketch></P5Sketch>
+            <P5Canvas></P5Canvas>
             <CallForAction></CallForAction>
             <CommentsTile
               userName1={postCard.commentUserName1}
