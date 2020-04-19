@@ -12,54 +12,102 @@ class P5Canvas extends Component {
   }
 
   sketch = p => {
-    let xspacing = 10; // Distance between each horizontal location
-    let w; // Width of entire wave
-    let theta = 0.0; // Start angle at 0
-    let amplitude = 25.0; // Height of wave
-    let period = 200.0; // How many pixels before the wave repeats
-    let dx; // Value for incrementing x
-    let yvalues; // Using an array to store height values for the wave
+    // Spring drawing constants for top bar
+    let springHeight = 20,
+      left,
+      right,
+      maxHeight = 100,
+      minHeight = 50,
+      over = false,
+      move = false;
+
+    // Spring simulation constants
+    let M = 0.7, // Mass
+      K = 0.7, // Spring constant
+      D = 0.8, // Damping
+      R = 40; // Rest position
+
+    // Spring simulation variables
+    let ps = R, // Position
+      vs = 0.0, // Velocity
+      as = 0, // Acceleration
+      f = 0; // Force
 
     p.setup = () => {
       p.createCanvas(280, 100);
-      w = 500;
-      dx = (1000 / period) * xspacing;
-      yvalues = new Array(p.floor(32));
+      p.rectMode(p.CORNERS);
+      p.noStroke();
+      left = p.width / 2 - 30;
+      right = p.width / 2 + 30;
     };
 
     p.draw = () => {
-      p.background(0);
-      p.calcWave();
-      p.renderWave();
+      p.background(102);
+      p.updateSpring();
+      p.drawSpring();
     };
 
-    p.calcWave = () => {
-      // Increment theta (try different values for
-      // 'angular velocity' here)
-      theta += p.mouseX / 2000;
+    p.drawSpring = () => {
+      // Set color
+      if (over || move) {
+        p.fill(255, 94, 61);
+      } else {
+        p.fill(204);
+      }
+      // Draw base
+      //   p.fill(0.2);
+      let baseWidth = 2.5 * ps + 20;
+      p.rect(
+        p.width / 2 - baseWidth,
+        ps + springHeight,
+        p.width / 2 + baseWidth,
+        p.height - 20,
+        20
+      );
 
-      // For every x value, calculate a y value with sine function
-      let x = theta;
+      //   p.rect(left, ps, right, ps + springHeight);
+    };
+
+    p.updateSpring = () => {
+      // Update the spring position
+      if (!move) {
+        f = -K * (ps - R); // f=-ky
+        as = f / M; // Set the acceleration, f=ma == a=f/m
+        vs = D * (vs + as); // Set the velocity
+        ps = ps + vs; // Updated position
+      }
+
+      if (p.abs(vs) < 0.8) {
+        vs = 0.0;
+      }
+      let baseWidth = 2.5 * ps + 20;
+
       if (
-        p.mouseY >= 0 &&
-        p.mouseY <= p.height &&
-        p.mouseX >= 0 &&
-        p.mouseX <= p.width
+        p.mouseX > p.width / 2 - baseWidth &&
+        p.mouseX < p.width / 2 + baseWidth &&
+        p.mouseY > ps + springHeight &&
+        p.mouseY < p.height
       ) {
-        for (let i = 0; i < yvalues.length; i++) {
-          yvalues[i] = p.sin(x) * (p.mouseY / 2);
-          x += dx;
-        }
+        over = true;
+      } else {
+        over = false;
+      }
+
+      // Set and constrain the position of top bar
+      if (move) {
+        ps = p.mouseY - springHeight / 2;
+        ps = p.constrain(ps, minHeight, maxHeight);
       }
     };
 
-    p.renderWave = () => {
-      p.noStroke();
-      p.fill(255);
-      // A simple way to draw the wave with an ellipse at each location
-      for (let x = 0; x < yvalues.length; x++) {
-        p.ellipse(x * xspacing, 50 + yvalues[x], 16, 16);
+    p.mousePressed = () => {
+      if (over) {
+        move = true;
       }
+    };
+
+    p.mouseReleased = () => {
+      move = false;
     };
   };
 
